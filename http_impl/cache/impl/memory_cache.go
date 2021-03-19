@@ -47,6 +47,6 @@ func (m *MemoryCache) GetStat() cache.Stat {
 }
 
 
-func NewMemoryCache()*MemoryCache{
-	return &MemoryCache{cache:make(map[string][]byte), rwMutex: sync.RWMutex{}, Stat: cache.Stat{}}
+func NewMemoryCache()*MemoryCache {
+	return &MemoryCache{cache: make(map[string][]byte), rwMutex: sync.RWMutex{}, Stat: cache.Stat{}}
 }
