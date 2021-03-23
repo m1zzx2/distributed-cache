@@ -1,7 +1,7 @@
 Implement a distributed cache
 
 
-####start:
+start:
 ```
 go build
 
@@ -11,6 +11,10 @@ go build
 
 
 
-#curl -v 127.0.0.1:8080/PUT  -XPUT  -d  '{"key":"testkey", "value": "1233"}'
-#curl 127.0.0.1:8080/INFO 
-#curl '127.0.0.1:8080/GET?key=testkey'
+http
+```
+curl -v 127.0.0.1:8080/PUT  -XPUT  -d  '{"key":"testkey", "value": "1233"}'
+curl 127.0.0.1:8080/INFO 
+curl '127.0.0.1:8080/GET?key=testkey'
+```
+
