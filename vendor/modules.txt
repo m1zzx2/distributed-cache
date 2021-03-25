@@ -1,0 +1,48 @@
+# github.com/armon/go-metrics v0.3.6
+## explicit
+github.com/armon/go-metrics
+# github.com/google/btree v1.0.1
+## explicit
+github.com/google/btree
+# github.com/hashicorp/errwrap v1.1.0
+## explicit
+github.com/hashicorp/errwrap
+# github.com/hashicorp/go-immutable-radix v1.3.0
+## explicit
+github.com/hashicorp/go-immutable-radix
+# github.com/hashicorp/go-msgpack v1.1.5
+## explicit
+github.com/hashicorp/go-msgpack/codec
+# github.com/hashicorp/go-multierror v1.1.1
+## explicit
+github.com/hashicorp/go-multierror
+# github.com/hashicorp/go-sockaddr v1.0.2
+## explicit
+github.com/hashicorp/go-sockaddr
+# github.com/hashicorp/golang-lru v0.5.4
+## explicit
+github.com/hashicorp/golang-lru/simplelru
+# github.com/hashicorp/memberlist v0.2.3
+## explicit
+github.com/hashicorp/memberlist
+# github.com/miekg/dns v1.1.41
+## explicit
+github.com/miekg/dns
+# github.com/sean-/seed v0.0.0-20170313163322-e2103e2c3529
+github.com/sean-/seed
+# golang.org/x/crypto v0.0.0-20210322153248-0c34fe9e7dc2
+## explicit
+# golang.org/x/net v0.0.0-20210324205630-d1beb07c2056
+## explicit
+golang.org/x/net/bpf
+golang.org/x/net/internal/iana
+golang.org/x/net/internal/socket
+golang.org/x/net/ipv4
+golang.org/x/net/ipv6
+# golang.org/x/sys v0.0.0-20210324051608-47abb6519492
+golang.org/x/sys/internal/unsafeheader
+golang.org/x/sys/unix
+golang.org/x/sys/windows
+# stathat.com/c/consistent v1.0.0
+## explicit
+stathat.com/c/consistent
