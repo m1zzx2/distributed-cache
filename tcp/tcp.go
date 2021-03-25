@@ -3,7 +3,9 @@ package tcp
 import (
 	"bufio"
 	"distributed-cache/cache"
+	"distributed-cache/cluster"
 	"distributed-cache/log"
+	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -12,7 +14,8 @@ import (
 )
 
 type Server struct {
-	cache cache.Cache
+	cache   cache.Cache
+	cluster cluster.Node
 }
 
 func (s *Server) Listen() {
@@ -30,9 +33,9 @@ func (s *Server) Listen() {
 	}
 }
 
-func NewCache(c cache.Cache) *Server {
+func NewCache(c cache.Cache, cluster cluster.Node) *Server {
 	return &Server{
-		c,
+		c, cluster,
 	}
 }
 func readLen(r *bufio.Reader) (int, error) {
@@ -60,6 +63,12 @@ func (s *Server) readKey(r *bufio.Reader) (string, error) {
 	if e != nil {
 		return "", e
 	}
+	key := string(k)
+
+	addr, ok := s.cluster.ShouldProcess(key)
+	if !ok{
+		return "", errors.New("redirect "+addr)
+	}
 	return string(k), nil
 }
 
@@ -77,7 +86,11 @@ func (s *Server) readKeyAndVal(r *bufio.Reader) (string, []byte, error) {
 	if e != nil {
 		return "", nil, e
 	}
-
+	key := string(k)
+	addr , ok := s.cluster.ShouldProcess(key)
+	if !ok{
+		return "" , nil, errors.New("redirect "+addr)
+	}
 	_, e = io.ReadFull(r, k)
 	if e != nil {
 		return "", nil, e
@@ -93,14 +106,14 @@ func (s *Server) readKeyAndVal(r *bufio.Reader) (string, []byte, error) {
 
 func sendResponse(value []byte, err error, conn net.Conn) error {
 	if err != nil {
-		errString := err.Error()+" "
+		errString := err.Error() + " "
 		tmp := fmt.Sprintf("-%d", len(errString)) + errString
 		_, e := conn.Write([]byte(tmp))
 		return e
 	}
 	vlen := fmt.Sprintf("%d ", len(value))
 	_, e := conn.Write(append([]byte(vlen), value...))
-	log.Infof("end sendRespose  msg :%v",string(append([]byte(vlen), value...)))
+	log.Infof("end sendRespose  msg :%v", string(append([]byte(vlen), value...)))
 	return e
 }
 
