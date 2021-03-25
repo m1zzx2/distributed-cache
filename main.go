@@ -8,7 +8,7 @@ import (
 
 func main(){
 	httpInstance := http.NewServer()
-	httpInstance.Listen()
 	ca := cacheImpl.NewMemoryCache()
 	go tcp.NewCache(ca).Listen()
+	httpInstance.Listen()
 }

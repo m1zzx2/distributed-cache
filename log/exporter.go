@@ -12,9 +12,9 @@ func New() Logger {
 }
 
 func Infof(format string, args ...interface{}) {
-	std.Infof(format, args)
+	std.Infof(format, args...)
 }
 
 func Errorf(format string, args ...interface{}) {
-	std.Errorf(format, args)
+	std.Errorf(format, args...)
 }
