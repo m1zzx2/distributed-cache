@@ -6,6 +6,11 @@ import (
 	"sync"
 )
 
+type pair struct{
+	k string
+	v []byte
+}
+
 type MemoryCache struct {
 	cache   map[string][]byte
 	rwMutex sync.RWMutex
@@ -49,4 +54,25 @@ func (m *MemoryCache) GetStat() cache.Stat {
 
 func NewMemoryCache()*MemoryCache {
 	return &MemoryCache{cache: make(map[string][]byte), rwMutex: sync.RWMutex{}, Stat: cache.Stat{}}
+}
+
+func (m *MemoryCache) NewScanner() cache.Scanner {
+	pairCh := make(chan *pair)
+	closeCh := make(chan struct{})
+	go func() {
+		defer close(closeCh)
+		m.rwMutex.RLock()
+		for k, v := range m.cache {
+			m.rwMutex.RUnlock()
+			select {
+			case <-closeCh:
+				return
+			case pairCh <- &pair{k, v}:
+			}
+			m.rwMutex.RLock()
+
+		}
+		m.rwMutex.RUnlock()
+	}()
+	return InMemoryScanner{pair{} , pairCh , closeCh}
 }

@@ -1,6 +1,7 @@
 package http
 
 import (
+	"bytes"
 	"distributed-cache/cache"
 	"distributed-cache/cluster"
 	"distributed-cache/log"
@@ -68,13 +69,12 @@ func (s *Server) Info(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-
 func (s *Server) Cluster(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
-		m:= s.Node.Members()
+		m := s.Node.Members()
 		b, e := json.Marshal(m)
-		if e != nil{
-			log.Errorf("Cluster marshal error err :%+v",e)
+		if e != nil {
+			log.Errorf("Cluster marshal error err :%+v", e)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -82,12 +82,44 @@ func (s *Server) Cluster(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (h *Server) rebalance() {
+	s := h.NewScanner()
+	defer s.Close()
+	c := &http.Client{}
+	for s.Scan() {
+		k := s.Key()
+		n, ok := h.Node.ShouldProcess(k)
+		if !ok {
+			req := Request{
+				Value: s.Value(),
+				Key:   k,
+			}
+			byteReq, _ := json.Marshal(req)
+			r, _ := http.NewRequest(http.MethodPut, "http://"+n+":8080/PUT", bytes.NewBuffer(byteReq))
+			resp, err := c.Do(r)
+			if err != nil {
+				log.Errorf("put cache node :%+v req :%+v rebalance err :%+v", n, req, err)
+				continue
+			}
+			respByte, _ := ioutil.ReadAll(resp.Body)
+			log.Errorf("put cache node :%+v req :%+v rebalance resp :%s", n, req, string(respByte))
+			h.Del(k)
+		}
+	}
+}
 
-
-
-
-
-
+func (s *Server) Rebalanced(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		m := s.Node.Members()
+		b, e := json.Marshal(m)
+		if e != nil {
+			log.Errorf("Cluster marshal error err :%+v", e)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		w.Write(b)
+	}
+}
 
 func (s *Server) Status(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
