@@ -11,7 +11,7 @@ import (
 
 type Server struct {
 	cache.Cache
-	cluster.Node
+	Node cluster.Node
 }
 
 func (s *Server) Listen() {
@@ -24,7 +24,7 @@ func (s *Server) Listen() {
 
 	http.HandleFunc("/cluster", s.Cluster)
 	log.Infof("start service port : %v", "8080")
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(s.Node.Addr()+":8080", nil)
 }
 
 func NewServer(cache cache.Cache, node cluster.Node) *Server {
@@ -71,7 +71,7 @@ func (s *Server) Info(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) Cluster(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
-		m:= s.Members()
+		m:= s.Node.Members()
 		b, e := json.Marshal(m)
 		if e != nil{
 			log.Errorf("Cluster marshal error err :%+v",e)

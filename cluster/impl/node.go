@@ -1,9 +1,11 @@
 package impl
 
 import (
+	"distributed-cache/log"
 	"github.com/hashicorp/memberlist"
 	"io/ioutil"
 	"stathat.com/c/consistent"
+	"time"
 )
 
 type Node struct{
@@ -25,7 +27,7 @@ func (n *Node) ShouldProcess(key string)(string, bool){
 
 
 func NewNode(addr, cluster string)(*Node, error){
-	conf := memberlist.DefaultLANConfig()
+	conf := memberlist.DefaultLocalConfig()
 	conf.Name = addr
 	conf.BindAddr = addr
 	conf.LogOutput = ioutil.Discard
@@ -50,7 +52,10 @@ func NewNode(addr, cluster string)(*Node, error){
 			for i , n := range m{
 				nodes[i] = n.Name
 			}
+			circle.Set(nodes)
+			time.Sleep(time.Second)
 		}
 	}()
+	log.Infof("new node addr :%+v",addr)
 	return &Node{circle, addr}, nil
 }

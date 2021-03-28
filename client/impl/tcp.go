@@ -73,6 +73,7 @@ func (c *tcpClient) recvResponse() (string, error) {
 	if e != nil {
 		return "", e
 	}
+	log.Infof("tcpClient.recvResponse return str : %s ",string(value))
 	return string(value), nil
 }
 

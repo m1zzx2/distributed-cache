@@ -19,8 +19,7 @@ type Server struct {
 }
 
 func (s *Server) Listen() {
-	log.Infof("tcp start listen :12346")
-	l, e := net.Listen("tcp", ":12346")
+	l, e := net.Listen("tcp", s.cluster.Addr()+":12346")
 	if e != nil {
 		panic(e)
 	}
@@ -86,11 +85,6 @@ func (s *Server) readKeyAndVal(r *bufio.Reader) (string, []byte, error) {
 	if e != nil {
 		return "", nil, e
 	}
-	key := string(k)
-	addr , ok := s.cluster.ShouldProcess(key)
-	if !ok{
-		return "" , nil, errors.New("redirect "+addr)
-	}
 	_, e = io.ReadFull(r, k)
 	if e != nil {
 		return "", nil, e
@@ -101,13 +95,19 @@ func (s *Server) readKeyAndVal(r *bufio.Reader) (string, []byte, error) {
 	if e != nil {
 		return "", nil, e
 	}
+
+	key := string(k)
+	addr , ok := s.cluster.ShouldProcess(key)
+	if !ok{
+		return "" , nil, errors.New("redirect "+addr)
+	}
 	return string(k), v, nil
 }
 
 func sendResponse(value []byte, err error, conn net.Conn) error {
 	if err != nil {
 		errString := err.Error() + " "
-		tmp := fmt.Sprintf("-%d", len(errString)) + errString
+		tmp := fmt.Sprintf("%d ", len(errString)) + errString
 		_, e := conn.Write([]byte(tmp))
 		return e
 	}
