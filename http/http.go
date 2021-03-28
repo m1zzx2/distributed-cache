@@ -24,6 +24,8 @@ func (s *Server) Listen() {
 	http.HandleFunc("/INFO", s.Info)
 
 	http.HandleFunc("/cluster", s.Cluster)
+
+	http.HandleFunc("/rebalance",s.Rebalanced)
 	log.Infof("start service port : %v", "8080")
 	http.ListenAndServe(s.Node.Addr()+":8080", nil)
 }
@@ -57,8 +59,9 @@ func (s *Server) PutObject(w http.ResponseWriter, r *http.Request) {
 			Response(w, nil, 1, err.Error())
 			return
 		}
+		log.Infof("start put node k :%+v v :%+v",r.Key, r.Value)
 		s.Cache.Set(r.Key, r.Value)
-		Response(w, nil, 0, "")
+		Response(w, nil, 0, "successful")
 	}
 }
 
@@ -88,6 +91,7 @@ func (h *Server) rebalance() {
 	c := &http.Client{}
 	for s.Scan() {
 		k := s.Key()
+		log.Infof("scanner k :%+v v :%+v", k, string(s.Value()))
 		n, ok := h.Node.ShouldProcess(k)
 		if !ok {
 			req := Request{
@@ -102,7 +106,7 @@ func (h *Server) rebalance() {
 				continue
 			}
 			respByte, _ := ioutil.ReadAll(resp.Body)
-			log.Errorf("put cache node :%+v req :%+v rebalance resp :%s", n, req, string(respByte))
+			log.Infof("put cache node :%+v req :%+v rebalance resp :%s", n, req, string(respByte))
 			h.Del(k)
 		}
 	}
@@ -110,14 +114,8 @@ func (h *Server) rebalance() {
 
 func (s *Server) Rebalanced(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
-		m := s.Node.Members()
-		b, e := json.Marshal(m)
-		if e != nil {
-			log.Errorf("Cluster marshal error err :%+v", e)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		w.Write(b)
+		go s.rebalance()
+		Response(w, "",0,"success")
 	}
 }
 

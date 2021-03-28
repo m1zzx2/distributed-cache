@@ -2,6 +2,7 @@ package impl
 
 import (
 	"distributed-cache/cache"
+	"distributed-cache/log"
 	"fmt"
 	"sync"
 )
@@ -63,6 +64,7 @@ func (m *MemoryCache) NewScanner() cache.Scanner {
 		defer close(closeCh)
 		m.rwMutex.RLock()
 		for k, v := range m.cache {
+			log.Infof("Scanner  k :%+v v :%+v",k,v)
 			m.rwMutex.RUnlock()
 			select {
 			case <-closeCh:
@@ -74,5 +76,5 @@ func (m *MemoryCache) NewScanner() cache.Scanner {
 		}
 		m.rwMutex.RUnlock()
 	}()
-	return InMemoryScanner{pair{} , pairCh , closeCh}
+	return &InMemoryScanner{pair{} , pairCh , closeCh}
 }

@@ -5,3 +5,4 @@
 
 distributed-cache
 client/run/run
+client/benchmark/benchmark
